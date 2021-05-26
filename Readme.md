@@ -28,15 +28,6 @@ If you wish to receive a BLE:Bit hardware with the latest firmware, it can be pu
 
 
 
-## Pre-Built JAR files
-
-You may find the latest BLE:Bit SDK JAR file here: 
-
-[jar_sdks/BLEBitSDK_17.jar]: jar_sdks/BLEBitSDK_17.jar	"JAR File"
-[jar_sdks/BLEBitSDK_17.jar]: tools/BLEBit_Server.jar	"BLE MiTM Server for Android"
-
-
-
 **For SDK documentation & examples visit**: [docs.blebit.io](https://docs.blebit.io)
 
 **Case Study Projects** @ [shellwanted.com](shellwanted.com)
