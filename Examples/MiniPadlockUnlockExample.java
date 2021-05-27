@@ -41,7 +41,7 @@ public class MiniPadlockUnlockExample {
 			
 			if (!ce.isInitializedCorrectly())
 			{
-				System.err.println("You have provided a BLE:Bit PE while this is a central controller. Provide central directly or remove the BLE:Bit Peripheral");
+				System.err.println("You have provided a BLE:Bit PE but this program needs a central controller. Provide central directly or remove the BLE:Bit Peripheral");
 				System.exit(1);
 			}
 			
