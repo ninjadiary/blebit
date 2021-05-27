@@ -1221,7 +1221,7 @@ class AdvertisementHandler implements CEAdvertisementCallback {
 	    int position = 0;
 	    
 	    /*
-	    while (position < ad_len) 
+	    while (position < ad_len - 1) 
 	    {
 			int len = ((int) ad[position]) & 0xff;
 			int type = ((int) ad[position + 1]) & 0xff;
@@ -1239,7 +1239,7 @@ class AdvertisementHandler implements CEAdvertisementCallback {
 	    position = 0;
 	    */
 	    
-	    while (position < ad_len && ad_len + 2 <= ad_len) 
+	    while (position < ad_len && position + 1 <= (ad_len - 1)) 
 	    {
 	      int len = ((int) ad[position]) & 0xff;
 	      int type = ((int) ad[position + 1]) & 0xff;
