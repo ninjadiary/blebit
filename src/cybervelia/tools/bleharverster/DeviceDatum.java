@@ -1,9 +1,9 @@
-package cybervelia.autocloner;
+package cybervelia.tools.bleharverster;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import cybervelia.autocloner.DeviceDatum.operation;
+import cybervelia.tools.bleharverster.DeviceDatum.operation;
 
 class DeviceDatum {
 	String characteristic;

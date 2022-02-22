@@ -1,4 +1,4 @@
-package cybervelia.autocloner;
+package cybervelia.tools.bleharverster;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,7 +40,7 @@ import cybervelia.sdk.types.ConnectionTypesCommon;
 import cybervelia.sdk.types.ConnectionTypesCommon.AddressType;
 import cybervelia.server.CryptoHelper;
 
-public class AutoCloner {
+public class BLEHarverster {
 	static boolean debugging = false;
 	static CEBLEDeviceCallbackHandler mycecallbackHandler = null;
 	static CEController ce;
