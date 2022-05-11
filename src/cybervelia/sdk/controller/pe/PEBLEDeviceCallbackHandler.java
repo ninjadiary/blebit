@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import cybervelia.sdk.controller.BLECharacteristic;
 import cybervelia.sdk.controller.pe.callbacks.BondKeysCallback;
-import cybervelia.sdk.controller.pe.callbacks.BondingCallback;
+import cybervelia.sdk.controller.pe.callbacks.PEBondCallback;
 import cybervelia.sdk.controller.pe.callbacks.PEConnectionCallback;
 import cybervelia.sdk.controller.pe.callbacks.PENotificationDataCallback;
 import cybervelia.sdk.controller.pe.callbacks.PEWriteEventCallback;
@@ -18,6 +18,7 @@ import cybervelia.sdk.controller.pe.handlers.PENotificationDataHandler;
 import cybervelia.sdk.controller.pe.handlers.PEReadHandler;
 import cybervelia.sdk.controller.pe.handlers.PEUpdateValueHandler;
 import cybervelia.sdk.controller.pe.handlers.PEWriteEventHandler;
+import cybervelia.server.CryptoHelper;
 
 public class PEBLEDeviceCallbackHandler{
 
@@ -51,6 +52,7 @@ public class PEBLEDeviceCallbackHandler{
 		
 		// called by handler
 		public boolean pushWrite(short handle, final byte []data, int data_len) {
+			
 			BLECharacteristic chr = controller.getCharacteristicByHandle(handle);
 			if (chr != null)
 			{
@@ -62,7 +64,7 @@ public class PEBLEDeviceCallbackHandler{
 				BLECharacteristic chr_cccd = controller.getCharacteristicByCCCDHandle(handle);
 				if (chr_cccd == null)
 				{
-					System.err.println("WARNING: Device write to non-existing characteristic");
+					System.err.println("WARNING: Device writes to non-existing characteristic");
 					return false;
 				}
 				else
@@ -216,7 +218,7 @@ public class PEBLEDeviceCallbackHandler{
 			read_handler.setCallback(callback);
 		}
 		
-		public void installBondingCallback(BondingCallback callback)
+		public void installBondCallback(PEBondCallback callback)
 		{
 			bonding_handler.setCallback(callback);
 		}

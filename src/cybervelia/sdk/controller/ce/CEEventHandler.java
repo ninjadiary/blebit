@@ -96,7 +96,6 @@ public class CEEventHandler implements Runnable {
 							break;
 							
 						case ConnectionTypesCE.EVT_DISCONNECTED:
-							System.err.println("Disconnect event received!");
 							byte reason = getByte(); // read disconnection reason
 							callbackHandler.deviceDisconnectedEvent(reason);
 							break;
@@ -335,7 +334,6 @@ public class CEEventHandler implements Runnable {
 					// User Disconnect
 					if (con_handler.isDisconnectTriggered())
 					{
-						System.err.println("User wants to disconnect!");
 						out.write(ConnectionTypesCE.EVT_DISCONNECT_NOW);
 						out.write(con_handler.getUserDisconnectReason());
 						
@@ -408,9 +406,11 @@ public class CEEventHandler implements Runnable {
 					// Delete Peer Bond
 					if(bond_handler.isDeletePeerBondTriggered())
 					{
+						boolean error_generated = false;
 						out.write(ConnectionTypesCE.EVT_DELETE_PEER_BOND);
 						sendShort(bond_handler.getDeleteBondPeerId());
-						try {verifySuccess(false);}catch(IOException e) {bond_handler.deletePeerBondRiseError();}
+						try {verifySuccess(false);}catch(IOException e) {bond_handler.deletePeerBondRiseError(); error_generated = true;}
+						if (!error_generated) bond_handler.deletePeerBondSuccess();
 						
 						device_turn = true;
 						continue;
@@ -426,7 +426,7 @@ public class CEEventHandler implements Runnable {
 		}catch(IOException ex) {
 			System.err.println("CEEventHandler: " + ex.getMessage());
 		}
-		System.out.println("CE Event Handler shutting down..");
+		//System.out.println("CE Event Handler shutting down..");
 	}
 	
 	private final byte[] readData(int size) throws IOException {

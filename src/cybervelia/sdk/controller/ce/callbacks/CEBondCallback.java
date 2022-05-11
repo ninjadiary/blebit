@@ -23,7 +23,8 @@ public interface CEBondCallback {
 	 * */
 	
 	public void authStatus(int status, int peers_fault);
-	public void bondingSucceed(int precedure);
-	public void bondingFailed(short error, int bond_error_src);
-	public void peerBondDeleteError();
+	public void bondSuccessful(int precedure);
+	public void bondUnsuccessful(short error, int bond_error_src);
+	public void deletePeerBondRiseError();
+	public void deletePeerBondSuccessful();
 }

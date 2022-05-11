@@ -45,7 +45,6 @@ public class PEUpdateValueHandler {
 	
 	public void setUpdateValueDataSent(boolean update_value_error_generated) {
 		this.update_value_error_generated = update_value_error_generated;
-		System.out.println("Error from Update: " + this.update_value_error_generated);
 		parent_handler.pushUpdateValue(update_value_characteristic_id, update_value_data, update_value_data_size);
 		synchronized(lock_until_update_value_received) {lock_until_update_value_received.notify();}
 	}

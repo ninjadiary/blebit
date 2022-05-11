@@ -2,7 +2,7 @@ package cybervelia.sdk.controller.pe.callbacks;
 
 import java.io.DataInputStream;
 
-public interface BondingCallback {
+public interface PEBondCallback {
 
 	
 /* AuthStatus Codes: */
@@ -48,8 +48,8 @@ public interface BondingCallback {
 		
 	 * */
 	
-	public void bondSuccess(int procedure);
-	public void bondFailure(short error, int bond_error_src);
+	public void bondSuccessful(int procedure);
+	public void bondUnsuccessful(short error, int bond_error_src);
 	public void deletePeerBondRiseError();
-	public void deletePeerBondSuccess();
+	public void deletePeerBondSuccessful();
 }

@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import cybervelia.sdk.controller.BLECharacteristic;
+import cybervelia.sdk.controller.BLEHelper;
 import cybervelia.sdk.controller.BLESerialPort;
 import cybervelia.sdk.controller.BLEService;
 import cybervelia.sdk.controller.pe.callbacks.BondKeysCallback;
-import cybervelia.sdk.controller.pe.callbacks.BondingCallback;
+import cybervelia.sdk.controller.pe.callbacks.PEBondCallback;
 import cybervelia.sdk.controller.pe.callbacks.PEConnectionCallback;
 import cybervelia.sdk.controller.pe.callbacks.PENotificationDataCallback;
 import cybervelia.sdk.controller.pe.callbacks.PEReadCallback;
@@ -57,6 +58,10 @@ public class PEController {
 	private byte connection_type;
 	private boolean disable_pairing_after_bonding = true;
 	private String peripheral_address = null;
+	private boolean con_parameters_set = false;
+	private boolean is_advdata_set = false;
+	private boolean is_pairig_set = false;
+	private boolean is_service_set = false;
 	
 	public PEController(String str_port, PEBLEDeviceCallbackHandler callbackHandler) throws IOException {
 		// Open Serial Port
@@ -113,6 +118,7 @@ public class PEController {
 			}
 			out.write(ConnectionTypesPE.EVT_RESET);
 			port.closePort();
+			
 			try {Thread.sleep(1000);}catch(InterruptedException ie) {}
 			
 			return true;
@@ -206,6 +212,11 @@ public class PEController {
 	}
 	
 	public void finishSetup() throws IOException {
+		if (peripheral_address == null) throw new IOException("Bluetooth address not set");
+		if (!con_parameters_set) throw new IOException("Connection parameters not set");
+		if (!is_pairig_set) throw new IOException("Device pairing not set");
+		if (!is_service_set) throw new IOException("No service has been set");
+		if (!is_advdata_set) throw new IOException("Advertisement Data not set");
 		if (is_initialized) throw new IOException("Device already Initialized");
 		out.write(ConnectionTypesPE.STP_FINISH_SETUP);
 		verifySuccess(false);
@@ -256,6 +267,8 @@ public class PEController {
 		
 		// Send adv data to the device:
 		data.sendAll(in, out, are_adv_data);
+		
+		is_advdata_set = true;
 	}
 	
 	/* sendBLECharacteristic: Send characteristic object to th device */
@@ -396,7 +409,7 @@ public class PEController {
 		{
 			sendBLECharacteristic(chr);
 		}
-		
+		is_service_set = true;
 		return true;
 	}
 	
@@ -426,10 +439,18 @@ public class PEController {
 	}
 	
 	public boolean sendNotification(short cccd_handle, final byte[] data, int size) throws IOException {
+		return sendNotificationPE(cccd_handle, data, size, true);
+	}
+	
+	public boolean sendUncheckedNotification(short cccd_handle, final byte[] data, int size) throws IOException {
+		return sendNotificationPE(cccd_handle, data, size, false);
+	}
+	
+	private boolean sendNotificationPE(short handle, final byte[] data, int size, boolean notif_check) throws IOException {
 		if (!this.callback_handler.isDeviceConnected()) return false;
-		if (!this.callback_handler.isNotificationAllowed(cccd_handle)) return false;
+		if (notif_check && !this.callback_handler.isNotificationAllowed(handle)) return false;
 		// if (size < data.length) throw new IOException("sendNotification: Given length smaller than size of buffer");
-		return callback_handler.setNotification(cccd_handle, data, size);
+		return callback_handler.setNotification(handle, data, size);
 	}
 	
 	public boolean updateValue(short handle, final byte[] data, int size) throws IOException {
@@ -455,7 +476,6 @@ public class PEController {
 		out.write(ConnectionTypesPE.STP_DISABLE);
 		out.write(ConnectionTypesCommon.DISABLE_ALLOW_REPAIRING);
 		verifySuccess(false);
-		System.out.println("Disabling Re-Pairing Success");
 	}
 	
 	public void bondConnect(boolean force_repairing) throws IOException {
@@ -490,7 +510,7 @@ public class PEController {
 	
 	public void sendBluetoothDeviceAddress(String address, ConnectionTypesCommon.BITAddressType address_type) throws IOException {
 		if (is_initialized) throw new IOException("Device already Initialized");
-		if (address.length() != 17)
+		if (address.length() != 17 || (BLEHelper.validateBLEAddress(address) == null))
 			throw new IOException("Malformed Hardware Address");
 		
 		out.write(ConnectionTypesPE.STP_SET_ADDRESS);
@@ -504,7 +524,6 @@ public class PEController {
 		out.write(hwaddr_to_byte_array(address));
 		verifySuccess(false);
 		peripheral_address = address;
-		System.out.println("Set Address Successfully");
 	}
 	
 	public void disableAdvertisingChannels(int channels) throws IOException {
@@ -558,6 +577,7 @@ public class PEController {
 			out.write(0);
 		
 		verifySuccess(false);
+		is_pairig_set = true;
 	}
 	
 	public void setAppearanceValue(short value) throws IOException {
@@ -682,11 +702,10 @@ public class PEController {
 			
 			out.write(hwaddr_to_byte_array(direct_address));
 		}
-		System.out.println("Waiting for device verification");
 		verifySuccess(false);
-		System.out.println("Connection Parameters Set Successfully");
 		this.advertisement_timeout = advertisement_timeout;
 		this.connection_type = connection_type;
+		con_parameters_set = true;
 	}
 	
 	boolean hasService(String service_id) {
@@ -797,7 +816,7 @@ public class PEController {
 		this.installReadCallback(callback);
 	}
 	
-	public void installBondingCallback(BondingCallback callback)
+	public void installBondingCallback(PEBondCallback callback)
 	{
 		this.installBondingCallback(callback);
 	}
@@ -887,23 +906,6 @@ public class PEController {
 		if (b < 0)
 			return -1;
 		return (byte) ((a << 4) | b);
-	}
-	
-}
-
-class myout extends OutputStream {
-
-	@Override
-	public void write(int arg0) throws IOException {
-		System.out.print(String.format("%02x", arg0));		
-	}
-	
-	public void write(byte []arg) {
-		for(int i=0; i<arg.length;++i) System.out.print(String.format("%02x", arg[i]));
-	}
-	
-	public void write(byte []arg, int offset, int len) {
-		for(int i=offset; i<len;++i) System.out.print(String.format("%02x", arg[i]));
 	}
 	
 }

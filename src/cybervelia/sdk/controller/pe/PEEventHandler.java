@@ -68,6 +68,7 @@ public class PEEventHandler implements Runnable {
 			while(!shutdown_thread) {
 				if (device_turn){	// Device -> To -> User
 					evt = getByte();
+					
 					switch(evt) {
 						
 					case ConnectionTypesPE.EVT_PIN_REQUEST:
@@ -196,6 +197,7 @@ public class PEEventHandler implements Runnable {
 				}
 				else	// User -> To -> Device
 				{
+					
 					if (con_handler.isTerminateTriggered())
 					{
 						out.write(ConnectionTypesPE.EVT_RESET);
@@ -349,7 +351,7 @@ public class PEEventHandler implements Runnable {
 		}catch(IOException ex) {
 			System.err.println("PEEventHandler: " + ex.getMessage());
 		}
-		System.out.println("PE Event Handler shutting down..");
+		//System.out.println("PE Event Handler shutting down..");
 	}
 	
 	private final void readDataIn(byte data[], int size) throws IOException {

@@ -61,6 +61,10 @@ public class CEBLEDeviceCallbackHandler {
 		this.controller = controller;
 	}
 	
+	public CEController getController() {
+		return this.controller;
+	}
+	
 	public boolean connect(byte []addr, ConnectionTypesCommon.AddressType type, boolean block) {
 		return con_handler.connectRequest(addr, type, block);
 	}

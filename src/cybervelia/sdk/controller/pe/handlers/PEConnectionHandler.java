@@ -93,11 +93,6 @@ public class PEConnectionHandler {
 	}
 	
 	public void setDeviceConnected(byte address_type_code, final byte[] address, short peer_id) {		
-		System.out.print("Device Connected - Client Address: ");
-		ConnectionTypesCommon.AddressType address_type = ConnectionTypesCommon.getAddressTypeFromCode(address_type_code);
-		for(int i = 0; i<6; ++i)
-			System.out.print(String.format("%02x", address[i]) + (i < 5 ? ":" : ""));
-		System.out.println(" " + (address_type == ConnectionTypesCommon.AddressType.PUBLIC_ADDR ? "PUBLIC" : "PRIVATE"));
 		this.is_device_connected = true;
 		this.connected_address = ConnectionTypesCommon.addressToStringFormat(address);
 		this.connected_address_type = ConnectionTypesCommon.getAddressTypeFromCode(address_type_code);
@@ -111,7 +106,7 @@ public class PEConnectionHandler {
 		if (user_callback != null)
 			user_callback.disconnected(disconnect_reason);
 		this.disconnect_reason = reason;
-		System.out.println("Device Disconnected with reason: " + reason);
+		
 		this.is_device_connected = false;
 		parent_handler.untriggerAll();
 		parent_handler.clearBondedFlag();

@@ -95,7 +95,13 @@ public class CEBondingHandler {
 	
 	public void deletePeerBondRiseError()
 	{
-		user_callback.peerBondDeleteError();
+		user_callback.deletePeerBondRiseError();
+	}
+	
+	public void deletePeerBondSuccess()
+	{
+		if(user_callback != null)
+			user_callback.deletePeerBondSuccessful();
 	}
 	
 	// PIN
@@ -157,20 +163,19 @@ public class CEBondingHandler {
 	// Bond Failed
 	public void bondingFailed(short error, int bond_error_src)
 	{
-		System.out.println("Bond Failed!");
-		
 		bonding_finished_with_success = false;
 		bonding_in_progress = false;
 		
 		synchronized(block_until_bond) {block_until_bond.notify();}
+		
+		if (user_callback != null)
+			user_callback.bondUnsuccessful(error, bond_error_src);
 	}
 	
-	// Bond Succeed
+	// Bonding has Succeed
 	public void bondingSucceed(int procedure)
 	{
 		bonded = true;
-		
-		System.out.println("Bond Succeed!");
 		
 		bonding_finished_with_success = true;
 		bonding_in_progress = false;
@@ -178,7 +183,7 @@ public class CEBondingHandler {
 		synchronized(block_until_bond) {block_until_bond.notify();}
 		
 		if (user_callback != null)
-			user_callback.bondingSucceed(procedure);
+			user_callback.bondSuccessful(procedure);
 	}
 	
 	public boolean isBonded()

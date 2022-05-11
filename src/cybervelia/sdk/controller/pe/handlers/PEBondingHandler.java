@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import cybervelia.sdk.controller.pe.PEBLEDeviceCallbackHandler;
-import cybervelia.sdk.controller.pe.callbacks.BondingCallback;
+import cybervelia.sdk.controller.pe.callbacks.PEBondCallback;
 
 public class PEBondingHandler {
 	private volatile boolean bond_triggered = false;
@@ -16,7 +16,7 @@ public class PEBondingHandler {
 	private short peer_id = -1;
 	private short peer_id_delete_bond = -1;
 	private PEBLEDeviceCallbackHandler parent_handler;
-	private BondingCallback user_callback = null;
+	private PEBondCallback user_callback = null;
 	private volatile boolean delete_peer_bond_trigger = false;
 	private final byte[] EMPTY_PIN = new byte[] {0,0,0,0,0,0};
 	
@@ -27,7 +27,7 @@ public class PEBondingHandler {
 		this.parent_handler = parent_handler;
 	}
 	
-	public void setCallback(BondingCallback callback)
+	public void setCallback(PEBondCallback callback)
 	{
 		this.user_callback = callback;
 	}
@@ -83,7 +83,7 @@ public class PEBondingHandler {
 	public void deletePeerBondSuccess()
 	{
 		if(user_callback != null)
-			user_callback.deletePeerBondSuccess();
+			user_callback.deletePeerBondSuccessful();
 	}
 	
 	
@@ -122,7 +122,7 @@ public class PEBondingHandler {
 		synchronized(block_until_bond) {block_until_bond.notify();}
 		
 		if (user_callback != null)
-			user_callback.bondFailure(error, bond_error_src); // 0 = Local Failure, 1 = Remote Failure
+			user_callback.bondUnsuccessful(error, bond_error_src); // 0 = Local Failure, 1 = Remote Failure
 	}
 	
 	// Bond Succeed
@@ -136,7 +136,7 @@ public class PEBondingHandler {
 		synchronized(block_until_bond) {block_until_bond.notify();}
 		
 		if(user_callback != null)
-			user_callback.bondSuccess(procedure);
+			user_callback.bondSuccessful(procedure);
 	}
 	
 	// Force re-Pairing on Bond
@@ -177,18 +177,9 @@ public class PEBondingHandler {
 	}
 	
 	// Possibly called because of Missing Keys - Repairing
-	public void setRepairingHappened() {		
-		System.err.println("Wrong PIN or Missing Keys? - Peer Device wishes to repair");
-		// For Security Reasons, we should not allow re-pairing in this state, at least not after disconnecting - but if you would like to do it, here is the code:
-		
-		if (!bonded && bonding_in_progress)
-		{
-			synchronized(block_until_bond)
-			{
-				force_repairing = false;
-				bond_triggered = true;
-			}
-		}
+	public void setRepairingHappened() {
+		if (user_callback != null)
+			user_callback.authStatus(0xbb00, 0);
 	}
 	
 	public void authStatus(int status, int reason)

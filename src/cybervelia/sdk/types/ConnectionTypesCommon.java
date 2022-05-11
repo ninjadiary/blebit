@@ -45,7 +45,28 @@ public class ConnectionTypesCommon {
 	public static final short BLE_APPEARANCE_CYCLING_CADENCE_SENSOR = 1155;
 	public static final short BLE_APPEARANCE_CYCLING_POWER_SENSOR = 1156;
 	public static final short BLE_APPEARANCE_CYCLING_SPEED_CADENCE_SENSOR = 1157;
-	private static final int SDK_SOFTWARE_VERSION = 17;
+	public static final int SDK_SOFTWARE_VERSION = 20;
+	public static final int BLE_GAP_SEC_STATUS_SUCCESS = 0x00;
+	public static final int BLE_GAP_SEC_STATUS_TIMEOUT =  0x01;
+	public static final int BLE_GAP_SEC_STATUS_PDU_INVALID =  0x02;
+	public static final int BLE_GAP_SEC_STATUS_RFU_RANGE1_BEGIN  = 0x03;
+	public static final int BLE_GAP_SEC_STATUS_RFU_RANGE1_END =  0x80;
+	public static final int BLE_GAP_SEC_STATUS_PASSKEY_ENTRY_FAILED =  0x81;
+	public static final int BLE_GAP_SEC_STATUS_OOB_NOT_AVAILABLE =  0x82;
+	public static final int BLE_GAP_SEC_STATUS_AUTH_REQ =  0x83;
+	public static final int BLE_GAP_SEC_STATUS_CONFIRM_VALUE =  0x84;
+	public static final int BLE_GAP_SEC_STATUS_PAIRING_NOT_SUPP = 0x85;
+	public static final int BLE_GAP_SEC_STATUS_ENC_KEY_SIZE  = 0x86;
+	public static final int BLE_GAP_SEC_STATUS_SMP_CMD_UNSUPPORTED  = 0x87;
+	public static final int BLE_GAP_SEC_STATUS_UNSPECIFIED  = 0x88;
+	public static final int BLE_GAP_SEC_STATUS_REPEATED_ATTEMPTS =  0x89;
+	public static final int BLE_GAP_SEC_STATUS_INVALID_PARAMS =  0x8A;
+	public static final int BLE_GAP_SEC_STATUS_DHKEY_FAILURE =  0x8B;
+	public static final int BLE_GAP_SEC_STATUS_NUM_COMP_FAILURE  = 0x8C;
+	public static final int BLE_GAP_SEC_STATUS_BR_EDR_IN_PROG  = 0x8D;
+	public static final int BLE_GAP_SEC_STATUS_X_TRANS_KEY_DISALLOWED =  0x8E;
+	public static final int BLE_GAP_SEC_STATUS_RFU_RANGE2_BEGIN =  0x8F;
+	public static final int BLE_GAP_SEC_STATUS_RFU_RANGE2_END =  0xFF;
 	
 	public enum PairingMethods {
 		NO_IO,

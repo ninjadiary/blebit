@@ -56,16 +56,6 @@ public class CEBondKeysHandler {
 		if (user_callback != null)
 			user_callback.setLTKKeys(own_key, ltkown_len, peer_key, ltkpeer_len);
 		
-		System.out.print("LTK OWN: ");
-		for(int i = 0; i<ltkown_len; ++i)
-			System.out.print(String.format("%02x", own_key[i]));
-		System.out.println();
-		
-		System.out.print("LTK PEER: ");
-		for(int i = 0; i<ltkpeer_len; ++i)
-			System.out.print(String.format("%02x", peer_key[i]));
-		System.out.println();
-		
 		System.arraycopy(peer_key, 0, this.own_key, 0, ltkown_len);
 		System.arraycopy(own_key, 0, this.own_key, 0, ltkpeer_len);
 		
