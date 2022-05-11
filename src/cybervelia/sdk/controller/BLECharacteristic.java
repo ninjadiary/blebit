@@ -387,6 +387,10 @@ public class BLECharacteristic {
 		return euuid;
 	}
 	
+	public String getUUIDString() {
+		return getUUID().toString();
+	}
+	
 	public void finalize() {
 		finalized = true;
 	}

@@ -10,6 +10,7 @@ import java.util.List;
 
 
 import cybervelia.sdk.controller.BLECharacteristic;
+import cybervelia.sdk.controller.BLEHelper;
 import cybervelia.sdk.controller.BLEService;
 import cybervelia.sdk.types.ConnectionTypesCE;
 import cybervelia.sdk.types.ConnectionTypesCommon;
@@ -31,6 +32,9 @@ public class CEController {
 	private byte CONNECTION_INITIALIZER[] = {0x10, 'c','y','b','e','r','v','e','l','i','a'};
 	private boolean init_correct = false;
 	private short firmware_version = 0;
+	private String central_address = null;
+	private boolean con_parameters_set = false;
+	private byte[] tempr_buff;
 	
 	public CEController(String str_port, CEBLEDeviceCallbackHandler callbackHandler) throws IOException 
 	{
@@ -60,6 +64,7 @@ public class CEController {
 		initializeConnection();
 		services_map = new HashMap<String, List<BLEService>>();
 		notification_data_tmp = new byte[2];
+		tempr_buff = new byte[31];
 	}
 	
 	public static boolean reset(String device_port)
@@ -160,13 +165,13 @@ public class CEController {
 		
 		out.write((byte)(ceparameters.scanRequestsEnforced() ? 1:0)); // to use ADV-SCAN while scanning for PEs
 		verifySuccess(false);
-		System.out.println("Connection Parameters Set Successfully");
+		con_parameters_set = true;
 	}
 	
 	public void sendBluetoothDeviceAddress(String address, ConnectionTypesCommon.BITAddressType address_type) throws IOException {
 		if (is_initialized) throw new IOException("Device already Initialized");
-		if (address.length() != 17)
-			throw new IOException("Malformed Hardware Address");
+		if (address.length() != 17 || (BLEHelper.validateBLEAddress(address) == null))
+			throw new IOException("Invalid hardware address");
 		
 		out.write(ConnectionTypesCE.STP_SET_ADDRESS);
 		
@@ -178,14 +183,14 @@ public class CEController {
 		
 		out.write(hwaddr_to_byte_array(address));
 		verifySuccess(false);
-		System.out.println("Set Address Successfully");
+		central_address = address;
 	}
 	
 	public void deviceDisableRepairingAfterBonding() throws IOException {
 		if (is_initialized) throw new IOException("Device already Initialized");
 		out.write(ConnectionTypesCE.STP_DISABLE_REPAIRING);
 		// device does not return any errors
-		System.out.println("Disabling Re-Pairing Success");
+		
 	}
 	
 	public void eraseBonds() throws IOException {
@@ -209,6 +214,8 @@ public class CEController {
 	}
 	
 	public void finishSetup() throws IOException {
+		if (central_address == null) throw new IOException("Bluetooth address not set");
+		if (!con_parameters_set)  throw new IOException("Connection parameters not set");
 		if (is_initialized) throw new IOException("Device already Initialized");
 		out.write(ConnectionTypesCE.STP_FINISH);
 		verifySuccess(false);
@@ -234,6 +241,11 @@ public class CEController {
 		
 		handler_thread = new Thread(evt_handler);
 		handler_thread.start();
+	}
+	
+	public void configurePairing(ConnectionTypesCommon.PairingMethods p_method) throws IOException
+	{
+		configurePairing(p_method, null);
 	}
 	
 	public void configurePairing(ConnectionTypesCommon.PairingMethods p_method, String static_pin) throws IOException
@@ -367,6 +379,12 @@ public class CEController {
 		services_map.remove(client_address);
 	}
 	
+	public boolean writeString(String str, short handle) throws IOException
+	{
+		if (str.getBytes().length > 31) throw new IOException("Length provided is greater than maximum allowed data length");
+		return callbackHandler.writeData(str.getBytes(), 0, str.getBytes().length, handle, 0);
+	}
+	
 	public boolean writeData(byte []data, int offset, int len, short handle) throws IOException
 	{
 		if (offset + len > data.length) throw new IOException("Write data length needs to be higher than provided length parameter");
@@ -384,6 +402,66 @@ public class CEController {
 		if (offset + len > data.length) throw new IOException("Write data length needs to be higher than provided length parameter");
 		if (len > 31) throw new IOException("Length provided is greater than maximum allowed data length");
 		callbackHandler.writeDataCMD(data, offset, len, handle);
+	}
+	
+	public boolean writeDataUUID(byte[] data, int offset, int len, String uuid) throws IOException
+	{
+		if (!isDeviceConnected())
+			throw new IOException("No connected device");
+		
+		String client_addr = getClientAddress();
+		BLECharacteristic chr = getCharacteristicByUUID(uuid, client_addr);
+		
+		if (chr == null)
+			throw new IOException("No characteristic using the provided UUID");
+		
+		return writeData(data, offset, len, chr.getValueHandle());
+	}
+	
+	public void writeDataCmdUUID(byte[] data, int offset, int len, String uuid) throws IOException
+	{
+		if (!isDeviceConnected())
+			throw new IOException("No connected device");
+		
+		String client_addr = getClientAddress();
+		BLECharacteristic chr = getCharacteristicByUUID(uuid, client_addr);
+		
+		if (chr == null)
+			throw new IOException("No characteristic using the provided UUID");
+		
+		writeDataCMD(data, offset, len, chr.getValueHandle());
+	}
+	
+	public void writeStringUUIDCmd(String str, String uuid) throws IOException
+	{
+		if (str.getBytes().length > 31) throw new IOException("Length provided is greater than maximum allowed data length");
+		
+		if (!isDeviceConnected())
+			throw new IOException("No connected device");
+		
+		String client_addr = getClientAddress();
+		BLECharacteristic chr = getCharacteristicByUUID(uuid, client_addr);
+		
+		if (chr == null)
+			throw new IOException("No characteristic using the provided UUID");
+		
+		writeDataCMD(str.getBytes(), 0, str.getBytes().length, chr.getValueHandle());
+	}
+	
+	public boolean writeStringUUID(String str, String uuid) throws IOException
+	{
+		if (str.getBytes().length > 31) throw new IOException("Length provided is greater than maximum allowed data length");
+		
+		if (!isDeviceConnected())
+			throw new IOException("No connected device");
+		
+		String client_addr = getClientAddress();
+		BLECharacteristic chr = getCharacteristicByUUID(uuid, client_addr);
+		
+		if (chr == null)
+			throw new IOException("No characteristic using the provided UUID");
+		
+		return callbackHandler.writeData(str.getBytes(), 0, str.getBytes().length, chr.getValueHandle(), 0);
 	}
 	
 	public boolean enableNotifications(short cccd_handle)
@@ -424,6 +502,66 @@ public class CEController {
 		return callbackHandler.readData(data, offset, len, handle, tm_ms);
 	}
 	
+	public int readDataUUID(byte[] data, int offset, int len, String uuid) throws IOException
+	{
+		if (!isDeviceConnected())
+			throw new IOException("No connected device");
+		
+		String client_addr = getClientAddress();
+		BLECharacteristic chr = getCharacteristicByUUID(uuid, client_addr);
+		
+		if (chr == null)
+			throw new IOException("No characteristic using the provided UUID");
+		
+		return readData(data, offset, len, chr.getValueHandle());
+	}
+	
+	public byte[] readDataDynamic(short handle) throws IOException {
+		byte[] retdata = null;
+		int ret = callbackHandler.readData(tempr_buff, 0, 31, handle, 0);
+		if (ret > 0) {
+			retdata = new byte[ret];
+			System.arraycopy(tempr_buff, 0, retdata, 0, ret);
+		}
+		return retdata;
+	}
+	
+	public byte[] readDataDynamicUUID(String uuid) throws IOException {
+		byte[] retdata = null;
+		int ret = readDataUUID(tempr_buff, 0, 31, uuid);
+		if (ret > 0) {
+			retdata = new byte[ret];
+			System.arraycopy(tempr_buff, 0, retdata, 0, ret);
+		}
+		return retdata;
+	}
+	
+	public String readDataDynamicString(short handle) throws IOException {
+		int ret = callbackHandler.readData(tempr_buff, 0, 31, handle, 0);
+		if (ret > 0) {
+			return new String(tempr_buff, 0, ret);
+		}
+		return new String();
+	}
+	
+	public String readDataDynamicUUIDString(String uuid) throws IOException {
+		
+		if (!isDeviceConnected())
+			throw new IOException("No connected device");
+		
+		String client_addr = getClientAddress();
+		BLECharacteristic chr = getCharacteristicByUUID(uuid, client_addr);
+		
+		if (chr == null)
+			throw new IOException("No characteristic using the provided UUID");
+		
+		int ret = callbackHandler.readData(tempr_buff, 0, 31, chr.getValueHandle(), 0);
+		if (ret > 0) {
+			return new String(tempr_buff, 0, ret);
+		}
+		return new String();
+	}
+	
 	public boolean bondNow(boolean force_repairing)
 	{
 		return callbackHandler.bondNow(force_repairing);
@@ -436,6 +574,19 @@ public class CEController {
 			for(BLEService service : services_map.get(client_address))
 			{
 				characteristic = service.getCharacteristicByHandle(handle);
+				if (characteristic != null) break;
+			}
+		}
+		return characteristic;
+	}
+	
+	public BLECharacteristic getCharacteristicByUUID(String uuid, String client_address)
+	{
+		BLECharacteristic characteristic = null;
+		if (services_map.containsKey(client_address)) {
+			for(BLEService service : services_map.get(client_address))
+			{
+				characteristic = service.getCharacteristicByUUID(uuid);
 				if (characteristic != null) break;
 			}
 		}

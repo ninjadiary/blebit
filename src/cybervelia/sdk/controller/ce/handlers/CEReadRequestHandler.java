@@ -95,9 +95,6 @@ public class CEReadRequestHandler {
 		if (parent_handler.isDiscoveryInProgress()) return; // this is called during discovery because the device issue some attribute reads. That's why we should ignore such reads responses
 		this.read_req_error = error;
 		
-		if (error != 0)
-			System.err.println("Read Response Error: " + error);
-		
 		if (this.read_req_error == 0)
 		{
 			System.arraycopy(data, 0, this.read_req_data, 0, data_len);

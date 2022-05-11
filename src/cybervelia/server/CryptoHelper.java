@@ -119,6 +119,17 @@ public class CryptoHelper {
         return hexString.toString();
     }
     
+    public static String bytesToSpacedHex(byte[] input_data) {
+        StringBuffer hexString = new StringBuffer();
+        for (int i = 0; i < input_data.length; i++) {
+            String hex = Integer.toHexString(0xff & input_data[i]);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+            hexString.append(" ");
+        }
+        return hexString.toString();
+    }
+    
     public static String bytesToHex(byte[] input_data, int size) {
         StringBuffer hexString = new StringBuffer();
         for (int i = 0; i < input_data.length && i<size; i++) {
@@ -129,6 +140,17 @@ public class CryptoHelper {
         return hexString.toString();
     }
 
+    public static String bytesToSpacedHex(byte[] input_data, int size) {
+        StringBuffer hexString = new StringBuffer();
+        for (int i = 0; i < input_data.length && i<size; i++) {
+            String hex = Integer.toHexString(0xff & input_data[i]);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+            hexString.append(" ");
+        }
+        return hexString.toString();
+    }
+    
     public static byte[] HMAC(byte data[], byte key[]) throws NoSuchAlgorithmException, InvalidKeyException
     {
         SecretKeySpec signingKey = new SecretKeySpec(key, "HmacSHA256");
@@ -179,8 +201,8 @@ public class CryptoHelper {
         str = str.toLowerCase();
         char[] passHex = str.toCharArray();
         boolean isHex = true;
-
-        if (str.length() % 2 == 0 && str.length() > 2) {
+        
+        if (str.length() % 2 == 0 && str.length() >= 2) {
             for (int i = 0; i < passHex.length; i++) {
                 if (Character.digit(passHex[i], 16) == -1)
                     isHex = false;

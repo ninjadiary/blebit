@@ -54,15 +54,6 @@ public class PEBondKeysHandler {
 		if (user_callback != null)
 			user_callback.setLTKKeys(own_key, ownkey_size, peer_key, peerkey_size);
 		
-		System.out.print("OWN LTK: ");
-		for(int i = 0; i<ownkey_size; ++i)
-			System.out.print(String.format("%02X ", own_key[i]));
-		System.out.println();
-		System.out.print("PEER LTK: ");
-		for(int i = 0; i<peerkey_size; ++i)
-			System.out.print(String.format("%02X ", peer_key[i]));
-		System.out.println();
-		
 		System.arraycopy(peer_key, 0, this.own_key, 0, ownkey_size);
 		System.arraycopy(own_key, 0, this.own_key, 0, peerkey_size);
 		

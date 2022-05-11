@@ -136,7 +136,7 @@ public class BLEService {
 	}
 	
 	public void addCharacteristic(BLECharacteristic chr) throws IOException {
-		if (finalized) throw new IOException("Service and its characteristics are aleady have been sent to the device");
+		if (finalized) throw new IOException("Service and characteristics have been already sent to the device");
 		characteristics.put(String.valueOf(chr.getCharacteristicId()), chr);
 	}
 	
@@ -171,6 +171,10 @@ public class BLEService {
 	
 	public UUID getUUID() {
 		return this.uuid;
+	}
+	
+	public String getUUIDString() {
+		return getUUID().toString();
 	}
 	
 	public ArrayList<BLECharacteristic> getAllCharacteristics(){

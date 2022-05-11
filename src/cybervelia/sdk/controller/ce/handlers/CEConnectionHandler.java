@@ -156,7 +156,7 @@ public class CEConnectionHandler {
 		for(int i = 0; i<6; ++i)
 			connected_address = connected_address+String.format("%02x", address[i]) + (i < 5 ? ":" : "");
 		this.is_device_connected = true;
-		System.out.println("Device Connected - Client Address: " + connected_address + " " + (connected_address_type == ConnectionTypesCommon.AddressType.PUBLIC_ADDR ? "PUBLIC" : "PRIVATE"));
+		
 		if(user_callback != null)
 			user_callback.connected(connected_address_type, connected_address);
 	}

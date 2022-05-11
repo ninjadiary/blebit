@@ -104,11 +104,6 @@ public class PEReadHandler {
 			user_callback.readEvent(characteristic, data, data_len);
 		}
 		
-		System.out.print("Read on Handle " + handle + " with a value of ");
-		
-		for(int i = 0; i<data_len; ++i)
-			System.out.print(String.format("%02X ", data[i]));
-		System.out.println();
 	}
 	
 	public void reset()

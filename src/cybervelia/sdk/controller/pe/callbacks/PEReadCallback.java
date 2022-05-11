@@ -5,7 +5,7 @@ import cybervelia.sdk.controller.pe.AuthorizedData;
 
 public interface PEReadCallback {
 	
-	boolean authorizeRead(BLECharacteristic characteristic, final byte[] data, int data_len, AuthorizedData authorized_Data);
+	boolean authorizeRead(BLECharacteristic characteristic, final byte[] data, int data_len, AuthorizedData authorized_data);
 	/*
 		System.out.print("Requesting Read Authentication - on Handle " + handle + " with a value of ");
 		for(int i = 0; i<data_len; ++i)

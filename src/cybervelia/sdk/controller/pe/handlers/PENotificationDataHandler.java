@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import cybervelia.sdk.controller.BLECharacteristic;
+import cybervelia.sdk.controller.BLEHelper;
 import cybervelia.sdk.controller.pe.NotificationValidation;
 import cybervelia.sdk.controller.pe.PEBLEDeviceCallbackHandler;
 import cybervelia.sdk.controller.pe.callbacks.PENotificationDataCallback;
@@ -56,7 +57,7 @@ public class PENotificationDataHandler {
 	public void setNotificationDataSent(boolean notification_error_generated) {
 		this.notification_error_generated = notification_error_generated;
 		parent_handler.pushNotification(notification_characteristic_id, notification_data, notification_data_size);
-		synchronized(lock_until_notification_received) {lock_until_notification_received.notify();}
+		synchronized(lock_until_notification_received) {lock_until_notification_received.notifyAll();}
 	}
 	
 	public boolean setNotificationData(byte characteristic_id, final byte[] data, int size) throws IOException {
@@ -91,9 +92,6 @@ public class PENotificationDataHandler {
 	}
 	
 	public boolean isNotificationAllowed(short handle) {
-		if (notification_status_map == null) 
-			System.err.println("WARNING: Notification_status_map is NULL");
-		
 		if (notification_status_map.containsKey(handle) && notification_status_map.get(handle)) return true;
 		else return false;
 	}
